@@ -21,12 +21,6 @@ sessionId = result['header']['session']['id']
 tokenId = result['header']['token']['id']
 print(sessionId, tokenId)
 
-
-
-#factoryNs1 = client.type_factory('ns1')
-#factoryNs1.session(id=sessionId)
-
-
 logoutResult = client.service.logout('',_soapheaders=[result['header']])
 
 print(logoutResult)
