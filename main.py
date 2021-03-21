@@ -16,4 +16,4 @@ loginParams = factory.loginParams(item=[domainLoginParam, loginLoginParam])
 
 result = client.service.login(credentials=loginParams, password='qwerty!@#')
 
-print(result)
+print(result['header'])
