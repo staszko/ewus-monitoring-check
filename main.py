@@ -5,27 +5,36 @@ ewusLogin='LEKARZ1'
 ewusPassword='qwerty!@#'
 ewusDomain = '15'
 
+def main():
+    client = zeep.Client(wsdl=wsdl)
 
-client = zeep.Client(wsdl=wsdl)
+    result = login(client)
+
+    print(result['header'])
+    sessionId = result['header']['session']['id']
+    tokenId = result['header']['token']['id']
+    print(sessionId, tokenId)
+
+    logoutResult = logout(client, result['header'])
+
+    print(logoutResult)
 
 #print(client._get_service("Auth"))
-factory = client.type_factory('ns3')
-domianParamValue = factory.paramValue(stringValue=ewusDomain)
-domainLoginParam = factory.loginParam(name='domain', value=domianParamValue)
 
+def login(client):
+    factory = client.type_factory('http://xml.kamsoft.pl/ws/kaas/login_types')
+    domianParamValue = factory.paramValue(stringValue=ewusDomain)
+    domainLoginParam = factory.loginParam(name='domain', value=domianParamValue)
 
-loginParamValue = factory.paramValue(stringValue=ewusLogin)
-loginLoginParam = factory.loginParam(name='login', value=loginParamValue)
+    loginParamValue = factory.paramValue(stringValue=ewusLogin)
+    loginLoginParam = factory.loginParam(name='login', value=loginParamValue)
 
-loginParams = factory.loginParams(item=[domainLoginParam, loginLoginParam])
+    loginParams = factory.loginParams(item=[domainLoginParam, loginLoginParam])
 
-result = client.service.login(credentials=loginParams, password=ewusPassword)
+    result = client.service.login(credentials=loginParams, password=ewusPassword)
+    return result
 
-print(result['header'])
-sessionId = result['header']['session']['id']
-tokenId = result['header']['token']['id']
-print(sessionId, tokenId)
+def logout(client, soapheaders):
+    return client.service.logout('',_soapheaders=[soapheaders])
 
-logoutResult = client.service.logout('',_soapheaders=[result['header']])
-
-print(logoutResult)
+main()
