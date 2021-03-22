@@ -1,4 +1,10 @@
 import zeep
+import sys
+import requests
+import html
+import logging
+
+logging.getLogger('zeep').setLevel(logging.ERROR)
 
 wsdl = 'https://ewus.nfz.gov.pl/ws-broker-server-ewus-auth-test/services/Auth?wsdl'
 ewusLogin='LEKARZ1'
@@ -6,20 +12,29 @@ ewusPassword='qwerty!@#'
 ewusDomain = '15'
 
 def main():
-    client = zeep.Client(wsdl=wsdl)
+    try:
+        client = zeep.Client(wsdl=wsdl)
 
-    result = login(client)
+        result = login(client)
 
-    print(result['header'])
-    sessionId = result['header']['session']['id']
-    tokenId = result['header']['token']['id']
-    print(sessionId, tokenId)
+        #print(result['header'])
+        sessionId = result['header']['session']['id']
+        tokenId = result['header']['token']['id']
+        #print(sessionId, tokenId)
 
-    logoutResult = logout(client, result['header'])
+        logoutResult = logout(client, result['header'])
 
-    print(logoutResult)
+        ok()
+        #print(logoutResult)
+    except zeep.exceptions.Fault as e:
+        critical(e)
+        print(e.message)
+    except requests.exceptions.HTTPError as e:
+        critical(e)
+    except Exception as e:
+        print(e.__class__, e)
+        unknown(e)
 
-#print(client._get_service("Auth"))
 
 def login(client):
     factory = client.type_factory('http://xml.kamsoft.pl/ws/kaas/login_types')
@@ -36,5 +51,21 @@ def login(client):
 
 def logout(client, soapheaders):
     return client.service.logout('',_soapheaders=[soapheaders])
+
+def ok():
+    print('OK: Zalogowano i wylogowano poprawnie')
+    sys.exit(0)
+
+def warning(e):
+    print('WARNING: ', html.unescape(e.__str__()))
+    sys.exit(1)
+
+def critical(e):
+    print('CRITICAL: ',  html.unescape(e.__str__()))
+    sys.exit(2)
+
+def unknown(e):
+    print('UNKNOWN: ',  html.unescape(e.__str__()))
+    sys.exit(3)
 
 main()
