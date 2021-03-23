@@ -6,6 +6,25 @@ import logging
 
 logging.getLogger('zeep').setLevel(logging.ERROR)
 
+#Due to ewus test server configuration when openssl is SET to SECLEVEL=2
+#request fails wiht error [SSL: DH_KEY_TOO_SMALL] dh key too small (_ssl.c:1108)
+#Therefore this app dockerized with python:3 default image fails (debian moved defaults to SECLEVEL=2)
+#Therefore I disabled Diffie-Hellmans key exchange 
+#
+#Resources 
+# https://stackoverflow.com/a/61627673
+# https://weakdh.org/
+# cide from https://stackoverflow.com/a/41041028
+#
+requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
+try:
+    requests.packages.urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST += 'HIGH:!DH:!aNULL'
+except AttributeError:
+    # no pyopenssl support used / needed / available
+    pass
+
+
+
 wsdl = 'https://ewus.nfz.gov.pl/ws-broker-server-ewus-auth-test/services/Auth?wsdl'
 ewusLogin='LEKARZ1'
 ewusPassword='qwerty!@#'
