@@ -6,15 +6,15 @@ import logging
 
 logging.getLogger('zeep').setLevel(logging.ERROR)
 
-#Due to ewus test server configuration when openssl is SET to SECLEVEL=2
-#request fails wiht error [SSL: DH_KEY_TOO_SMALL] dh key too small (_ssl.c:1108)
-#Therefore this app dockerized with python:3 default image fails (debian moved defaults to SECLEVEL=2)
-#Therefore I disabled Diffie-Hellmans key exchange 
+#Due to ewus test server configuration request fails  
+# when openssl is SET to SECLEVEL=2 The error is: [SSL: DH_KEY_TOO_SMALL] dh key too small (_ssl.c:1108)
+# Therefore this app dockerized with python:3 default image fails (debian moved defaults to SECLEVEL=2)
+# Therefore I've disabled Diffie-Hellmans key exchange
 #
-#Resources 
-# https://stackoverflow.com/a/61627673
-# https://weakdh.org/
-# cide from https://stackoverflow.com/a/41041028
+# Resources 
+#  https://stackoverflow.com/a/61627673
+#  https://weakdh.org/
+#  code from https://stackoverflow.com/a/41041028
 #
 requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += 'HIGH:!DH:!aNULL'
 try:
