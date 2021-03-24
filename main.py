@@ -24,7 +24,6 @@ except AttributeError:
     pass
 
 
-
 wsdl = 'https://ewus.nfz.gov.pl/ws-broker-server-ewus-auth-test/services/Auth?wsdl'
 ewusLogin='LEKARZ1'
 ewusPassword='qwerty!@#'
