@@ -2,8 +2,7 @@ FROM python:3.8-alpine
 
 WORKDIR /usr/src/app
 
-COPY main.py .
-COPY requirements.txt .
+COPY main.py requirements.txt ./
 
 RUN apk add --update --no-cache  --virtual .build-deps  g++ gcc libxslt-dev && \
      apk add --no-cache libxslt && \
