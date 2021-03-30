@@ -29,6 +29,8 @@ ewusLogin='LEKARZ1'
 ewusPassword='qwerty!@#'
 ewusDomain = '15'
 
+testowyPesel = '00060958187'
+
 def main():
     try:
         client = zeep.Client(wsdl=wsdl)
@@ -39,6 +41,8 @@ def main():
         sessionId = result['header']['session']['id']
         tokenId = result['header']['token']['id']
         #print(sessionId, tokenId)
+
+        getCheckCWU(testowyPesel)
 
         logoutResult = logout(client, result['header'])
 
@@ -85,5 +89,13 @@ def critical(e):
 def unknown(e):
     print('UNKNOWN: ',  html.unescape(e.__str__()))
     sys.exit(3)
+
+
+def getCheckCWU(pesel):
+    msg = f'''<ewus:status_cwu_pyt xmlns:ewus=\"https://ewus.nfz.gov.pl/ws/broker/ewus/status_cwu/v3\">
+                  <ewus:numer_pesel>{pesel}</ewus:numer_pesel>
+                  <ewus:system_swiad nazwa=\"ewus_check\" wersja=\"0.0.0\"/>
+               </ewus:status_cwu_pyt>'''
+    print(msg.format(pesel))
 
 main()
