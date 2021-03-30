@@ -42,7 +42,7 @@ def main():
         tokenId = result['header']['token']['id']
         #print(sessionId, tokenId)
 
-        getCheckCWU(testowyPesel)
+        getCheckCwuMessage(testowyPesel)
 
         logoutResult = logout(client, result['header'])
 
@@ -91,7 +91,7 @@ def unknown(e):
     sys.exit(3)
 
 
-def getCheckCWU(pesel):
+def getCheckCwuMessage(pesel):
     msg = f'''<ewus:status_cwu_pyt xmlns:ewus=\"https://ewus.nfz.gov.pl/ws/broker/ewus/status_cwu/v3\">
                   <ewus:numer_pesel>{pesel}</ewus:numer_pesel>
                   <ewus:system_swiad nazwa=\"ewus_check\" wersja=\"0.0.0\"/>
