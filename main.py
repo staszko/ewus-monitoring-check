@@ -42,7 +42,9 @@ def main():
         tokenId = result['header']['token']['id']
         #print(sessionId, tokenId)
 
-        getCheckCwuMessage(testowyPesel)
+        #getCheckCwuMessage(testowyPesel)
+        checkPesel(result['header'])
+
 
         logoutResult = logout(client, result['header'])
 
@@ -70,6 +72,24 @@ def login(client):
 
     result = client.service.login(credentials=loginParams, password=ewusPassword)
     return result
+
+def checkPesel(soapheaders):
+    wsdl = 'https://ewus.nfz.gov.pl/ws-broker-server-ewus-auth-test/services/ServiceBroker?wsdl'
+    client = zeep.Client(wsdl=wsdl)
+    client._soapheaders =[soapheaders]
+    factory = client.type_factory('http://xml.kamsoft.pl/ws/common') 
+
+
+    service_location = factory.ServiceLocation()
+    service_location.namespace = 'nfz.gov.pl/ws/broker/cwu'
+    service_location.localname = 'checkCWU'
+    service_location.version = '5.0'
+
+    print(service_location)
+
+    #client.service.executeService()
+    return true
+    #return client.service.logout('',_soapheaders=[soapheaders])
 
 def logout(client, soapheaders):
     return client.service.logout('',_soapheaders=[soapheaders])
