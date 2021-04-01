@@ -3,6 +3,7 @@ import sys
 import requests
 import html
 import logging
+import datetime
 
 logging.getLogger('zeep').setLevel(logging.ERROR)
 
@@ -73,21 +74,28 @@ def login(client):
     result = client.service.login(credentials=loginParams, password=ewusPassword)
     return result
 
+def getCheckCwuMessage(pesel):
+    msg = f'''<ewus:status_cwu_pyt xmlns:ewus=\"https://ewus.nfz.gov.pl/ws/broker/ewus/status_cwu/v3\">
+                  <ewus:numer_pesel>{pesel}</ewus:numer_pesel>
+                  <ewus:system_swiad nazwa=\"ewus_check\" wersja=\"0.0.0\"/>
+               </ewus:status_cwu_pyt>'''
+    #print(msg.format(pesel))
+    return msg
+
+
 def checkPesel(soapheaders):
     wsdl = 'https://ewus.nfz.gov.pl/ws-broker-server-ewus-auth-test/services/ServiceBroker?wsdl'
     client = zeep.Client(wsdl=wsdl)
     client._soapheaders =[soapheaders]
     factory = client.type_factory('http://xml.kamsoft.pl/ws/common') 
 
-
     service_location = factory.ServiceLocation()
     service_location.namespace = 'nfz.gov.pl/ws/broker/cwu'
     service_location.localname = 'checkCWU'
     service_location.version = '5.0'
 
-    print(service_location)
+    client.service.executeService(service_location=service_location, datetime='2021-04-01', payload_text=getCheckCwuMessage('12345678901'))
 
-    #client.service.executeService()
     return true
     #return client.service.logout('',_soapheaders=[soapheaders])
 
@@ -111,11 +119,5 @@ def unknown(e):
     sys.exit(3)
 
 
-def getCheckCwuMessage(pesel):
-    msg = f'''<ewus:status_cwu_pyt xmlns:ewus=\"https://ewus.nfz.gov.pl/ws/broker/ewus/status_cwu/v3\">
-                  <ewus:numer_pesel>{pesel}</ewus:numer_pesel>
-                  <ewus:system_swiad nazwa=\"ewus_check\" wersja=\"0.0.0\"/>
-               </ewus:status_cwu_pyt>'''
-    print(msg.format(pesel))
 
 main()
