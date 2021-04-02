@@ -4,8 +4,35 @@ import requests
 import html
 import logging
 import datetime
+import inspect
+import logging.config
 
-logging.getLogger('zeep').setLevel(logging.ERROR)
+logging.config.dictConfig({
+    'version': 1,
+    'formatters': {
+        'verbose': {
+            'format': '%(name)s: %(message)s'
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'zeep.transports': {
+            'level': 'DEBUG',
+            'propagate': True,
+            'handlers': ['console'],
+        },
+    }
+})
+
+#logging.getLogger('zeep').setLevel(logging.ERROR)
+logging.getLogger('zeep').setLevel(logging.DEBUG)
+
 
 #Due to ewus test server configuration request fails  
 # when openssl is SET to SECLEVEL=2 The error is: [SSL: DH_KEY_TOO_SMALL] dh key too small (_ssl.c:1108)
@@ -86,17 +113,50 @@ def getCheckCwuMessage(pesel):
 def checkPesel(soapheaders):
     wsdl = 'https://ewus.nfz.gov.pl/ws-broker-server-ewus-auth-test/services/ServiceBroker?wsdl'
     client = zeep.Client(wsdl=wsdl)
-    client._soapheaders =[soapheaders]
+    #client._soapheaders =[soapheaders]
     factory = client.type_factory('http://xml.kamsoft.pl/ws/common') 
 
     service_location = factory.ServiceLocation()
-    service_location.namespace = 'nfz.gov.pl/ws/broker/cwu'
+    service_location.namespace = 'http://nfz.gov.pl/ws/broker/cwu'
     service_location.localname = 'checkCWU'
     service_location.version = '5.0'
 
-    client.service.executeService(service_location=service_location, datetime='2021-04-01', payload_text=getCheckCwuMessage('12345678901'))
+    factory = client.type_factory('http://xml.kamsoft.pl/ws/broker') 
 
-    return true
+    params = factory.ArrayOfParam
+    payload = factory.Payload
+    payload.textload = getCheckCwuMessage('12345678901')
+
+    req = """
+        <![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:com="http://xml.kamsoft.pl/ws/common" xmlns:brok="http://xml.kamsoft.pl/ws/broker">
+    <soapenv:Header>
+        <com:session id="86E91D37D4C559ABE0677F7ADA1CE77F" xmlns:ns1="http://xml.kamsoft.pl/ws/common"/>
+        <com:authToken id="BSmV7uJGISTPK4MdHYIcoW" xmlns:ns1="http://xml.kamsoft.pl/ws/common"/>
+    </soapenv:Header>
+    <soapenv:Body>
+        <brok:executeService>
+            <com:location>
+                <com:namespace>http://nfz.gov.pl/ws/broker/cwu</com:namespace>
+                <com:localname>checkCWU</com:localname>
+                <com:version>5.0</com:version>
+            </com:location>
+            <brok:date>2008-09-12T09:37:36.406+01:00</brok:date>    
+            <brok:payload>   
+            <brok:textload>
+                <status_cwu_pyt>
+                    <numer_pesel>49091480757</numer_pesel>
+                    <system_swiad nazwa="eWUS" wersja="5.0"></system_swiad>
+                </status_cwu_pyt>
+            </brok:textload>
+            </brok:payload>    
+        </brok:executeService>
+    </soapenv:Body>
+    </soapenv:Envelope>
+    """
+    client.service.executeService(id=req)
+    #client.service.executeService(service_location, '2020-04-02T11:17:00', params, payload] )
+    
+    return True
     #return client.service.logout('',_soapheaders=[soapheaders])
 
 def logout(client, soapheaders):
